@@ -178,8 +178,7 @@ function Animal.Ride()
 
 	local AttachedEntity = GetEntityAttachedTo(Ped)
 
-	if (IsEntityAttached(Ped)) and (GetEntityModel(AttachedEntity) == GetHashKey("a_c_deer") or GetEntityModel(AttachedEntity) == GetHashKey("a_c_cow") 
-	    or GetEntityModel(AttachedEntity) == GetHashKey("a_c_boar")) then -- Checks if player is on animal
+	if (IsEntityAttached(Ped)) and (GetEntityModel(AttachedEntity) == GetHashKey("a_c_deer") or GetEntityModel(AttachedEntity) == GetHashKey("a_c_cow") or GetEntityModel(AttachedEntity) == GetHashKey("a_c_boar")) then -- Checks if player is on animal
 		local SideCoordinates = GetCoordsInfrontOfEntityWithDistance(AttachedEntity, 1.0, 90.0) -- Ensures player and animal are at the correct coords
 		local SideHeading = GetEntityHeading(AttachedEntity)
 
