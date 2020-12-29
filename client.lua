@@ -30,9 +30,9 @@ IhaveReplacedMyDeerWithModNumber1 = false --[[
 										If mod is installed, change "IhaveReplacedMyDeerWithModNumber1" to true
 										]]
 
-local rideAnimal = 21 -- Defines "21" to variable rideAnimal
-local controlAnimal = 71 -- Defines "71" to variable controlAnimal
-local boardAnimal = 23 -- Defines "23" to variable boardAnimal
+local rideAnimal = 21 -- Defines "21" to variable rideAnimal (This will be the keybind to make the animal run - Current Keybind: [LEFT SHIFT])
+local controlAnimal = 71 -- Defines "71" to variable controlAnimal (This will be the keybind to gain control of the animal - Current Keybind: [W])
+local boardAnimal = 23 -- Defines "23" to variable boardAnimal (This will be the keybind to board the animal - Current Keybind: [F])
 
 local HelperMessageID = 0
 AnimalControlStatus =  0.05 -- Sets the player to have no control over the animal
