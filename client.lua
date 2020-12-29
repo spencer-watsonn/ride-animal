@@ -31,6 +31,8 @@ IhaveReplacedMyDeerWithModNumber1 = false --[[
 										]]
 
 local rideAnimal = 21 -- Defines "21" to variable rideAnimal
+local controlAnimal = 71 -- Defines "71" to variable controlAnimal
+local boardAnimal = 23 -- Defines "23" to variable boardAnimal
 
 local HelperMessageID = 0
 AnimalControlStatus =  0.05 -- Sets the player to have no control over the animal
@@ -138,7 +140,7 @@ function Animal.Attach()
 
 	if NetworkGetPlayerIndexFromPed(Animal.Handle) == -1 then
 		if not (HelperMessageID == 2) and not Animal.InControl then
-			DisplayHelpText('Keep tapping ~INPUT_VEH_ACCELERATE~ to get control of the ' .. AnimalName)
+			DisplayHelpText('Keep tapping [W] to get control of the ' .. AnimalName)
 			HelperMessageID = 2
 			AnimalControlStatus = 0.05
 		end
@@ -293,10 +295,10 @@ Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(0)
 
-		if IsControlJustPressed(1, 23) then -- Checks for key press of [F] key
+		if IsControlJustPressed(1, boardAnimal) then -- Checks for key press of [F] key
 			Animal.Ride()
 		end
-
+		
 		if XNL_IsRidingAnimal then
 			local Ped = PlayerPedId()
 			local AttachedEntity = GetEntityAttachedTo(Ped)
@@ -333,7 +335,7 @@ Citizen.CreateThread(function()
 						end
 					else
 						if NetworkGetPlayerIndexFromPed(Animal.Handle) == -1 then
-							if IsControlJustPressed(1, 71) then -- Rapidly pressing the [W] key allows the player to gain control of the animal
+							if IsControlJustPressed(1, controlAnimal) then -- Rapidly pressing the [W] key allows the player to gain control of the animal
 								if AnimalControlStatus < 0.1 then
 									AnimalControlStatus = AnimalControlStatus + 0.005
 									if AnimalControlStatus > 0.1 then 
