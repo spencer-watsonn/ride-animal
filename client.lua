@@ -1,8 +1,23 @@
 --[[
- Known "bugs/issues":
-  - Some poses on top of the animal are 'not perfect' and might cause some slight clipping
-  - Running with the animal is 'not that great'
-===========================================================================================================================
+
+Know Bugs/Issues:
+	Some poses on top of the animal are 'not perfect' and might cause some slight clipping
+
+Changes:
+	Range for Speed = Animal.Speed.Run has been changed from 8.0 to 4.0
+		This has made the run less buggy
+		Run now works in a straight line
+        	When turning while running, the animal walks then runs once straight
+        	Going up rough terrain (eg. mountainside with no path) sometimes makes the animal ragdoll
+
+	Speed for run has been changed from 3.0 to 10.0
+		This makes the run a run and not a speed walk/light jog
+		Run speed seems to be around the same as that of a player on foot
+
+Unlisted YouTube Video of the Modified Script in Use:
+	With Run Removed: https://youtu.be/1bWWwbRCy2k
+	With Run: https://youtu.be/V_V7FUIkDbs
+
 ]]
 
 function OnPlayerRequestToRideAnimal()
@@ -10,24 +25,27 @@ function OnPlayerRequestToRideAnimal()
 end
 
 local AllowRidingAnimalPlayers = false
-IhaveReplacedMyDeerWithModNumber1 = false
+IhaveReplacedMyDeerWithModNumber1 = false --[[
+										Current supported mod: https://www.gta5-mods.com/misc/horse-mod
+										If mod is installed, change "IhaveReplacedMyDeerWithModNumber1" to true
+										]]
 
-local rideAnimal = 23
+local rideAnimal = 21 -- Defines "21" to variable rideAnimal
 
 local HelperMessageID = 0
-AnimalControlStatus =  0.05
-XNL_IsRidingAnimal = false		
+AnimalControlStatus =  0.05 -- Sets the player to have no control over the animal
+XNL_IsRidingAnimal = false	-- Sets the player to not riding the animal	
 
 local Animal = {
 	Handle = nil,
-	Invincible = false,
-	Ragdoll = false,
+	Invincible = false, -- Sets animal to take damage and ragdoll as normal
+	Ragdoll = false, -- Sets whether or not the animal is ragdolling to false
 	Marker = false,
-	InControl = false,
+	InControl = false, -- Sets the player to not being in control
 	IsFleeing = false,
 	Speed = {
-		Walk = 2.0,
-		Run = 10.0,
+		Walk = 2.0, -- Sets animal walk speed to 2
+		Run = 10.0, -- Sets animal run speed to 10
 	},
 }
 
@@ -93,10 +111,10 @@ function Animal.Attach()
 
 	AnimalName = "Deer"
 	AnimalType = 1
-	XAminalOffSet = 0.0 
-	AnimalOffSet  = 0.2 
+	XAminalOffSet = 0.0 -- Default DEER offset
+	AnimalOffSet  = 0.2 -- Default DEER offset
 
-	if GetEntityModel(Animal.Handle) == GetHashKey('a_c_deer') and IhaveReplacedMyDeerWithModNumber1 then 
+	if GetEntityModel(Animal.Handle) == GetHashKey('a_c_deer') and IhaveReplacedMyDeerWithModNumber1 then -- If the supported mod is installed, and it is stated, the follow IF statement will run
 		AnimalName = "Horse"
 		AnimalType = 1
 		AnimalOffSet  = 0.12
@@ -125,29 +143,30 @@ function Animal.Attach()
 			AnimalControlStatus = 0.05
 		end
 	end
+
+	SetCurrentPedWeapon(Ped, "weapon_unarmed", true) -- Sets player to unarmed (animals can possibly freak out if player is armed)
 													
 	AttachEntityToEntity(Ped, Animal.Handle, GetPedBoneIndex(Animal.Handle, 24816), XAminalOffSet, 0.0, AnimalOffSet, 0.0, 0.0, -90.0, false, false, false, true, 2, true)
 
 	if AnimalType == 1  then
-		RequestAnimDict("amb@prop_human_seat_chair@male@generic@base")
+		RequestAnimDict("amb@prop_human_seat_chair@male@generic@base") -- Requests player animation for on deer
 		while not HasAnimDictLoaded("amb@prop_human_seat_chair@male@generic@base") do
 			Citizen.Wait(500)
 		end
-		TaskPlayAnim(Ped, "amb@prop_human_seat_chair@male@generic@base", "base", 8.0, 1, -1, 1, 1.0, 0, 0, 0)
+		TaskPlayAnim(Ped, "amb@prop_human_seat_chair@male@generic@base", "base", 8.0, 1, -1, 1, 1.0, 0, 0, 0) -- Sets player animation for on deer
 	elseif AnimalType == 2 or AnimalType == 3 then
-		RequestAnimDict("amb@prop_human_seat_chair@male@elbows_on_knees@idle_a")
+		RequestAnimDict("amb@prop_human_seat_chair@male@elbows_on_knees@idle_a") -- Requests player animation for on cow
 		while not HasAnimDictLoaded("amb@prop_human_seat_chair@male@elbows_on_knees@idle_a") do
 			Citizen.Wait(500)
 		end
-
-		TaskPlayAnim(Ped, "amb@prop_human_seat_chair@male@elbows_on_knees@idle_a", "idle_a", 8.0, 1, -1, 1, 1.0, 0, 0, 0)
+		TaskPlayAnim(Ped, "amb@prop_human_seat_chair@male@elbows_on_knees@idle_a", "idle_a", 8.0, 1, -1, 1, 1.0, 0, 0, 0) -- Sets player animation for on cow
 	end
 	
 
 	
 	FreezeEntityPosition(Animal.Handle, false)
 	FreezeEntityPosition(Ped, false)
-	XNL_IsRidingAnimal = true
+	XNL_IsRidingAnimal = true -- Sets the player to riding animal
 end
 
 function Animal.Ride()
@@ -160,21 +179,21 @@ function Animal.Ride()
 	local AttachedEntity = GetEntityAttachedTo(Ped)
 
 	if (IsEntityAttached(Ped)) and (GetEntityModel(AttachedEntity) == GetHashKey("a_c_deer") or GetEntityModel(AttachedEntity) == GetHashKey("a_c_cow") 
-	    or GetEntityModel(AttachedEntity) == GetHashKey("a_c_boar")) then
-		local SideCoordinates = GetCoordsInfrontOfEntityWithDistance(AttachedEntity, 1.0, 90.0)
+	    or GetEntityModel(AttachedEntity) == GetHashKey("a_c_boar")) then -- Checks if player is on animal
+		local SideCoordinates = GetCoordsInfrontOfEntityWithDistance(AttachedEntity, 1.0, 90.0) -- Ensures player and animal are at the correct coords
 		local SideHeading = GetEntityHeading(AttachedEntity)
 
 		SideCoordinates.z = GetGroundZ(SideCoordinates.x, SideCoordinates.y, SideCoordinates.z)
 
 		Animal.Handle = nil
-		Animal.InControl = false
+		Animal.InControl = false -- Sets player to not have control
 		DetachEntity(Ped, true, false)
 		ClearPedSecondaryTask(Ped)
 		ClearPedTasksImmediately(Ped)
 
 		AminD2 = "amb@prop_human_seat_chair@male@elbows_on_knees@react_aggressive"
-		RequestAnimDict(AminD2)
-		while not HasAnimDictLoaded(AminD2) do
+		RequestAnimDict(AminD2) -- Requests animation
+		while not HasAnimDictLoaded(AminD2) do -- Checks to see if animation has loaded
 			Citizen.Wait(10)
 		end
 		TaskPlayAnim(Ped, AminD2, "exit_left", 8.0, 1, -1, 0, 1.0, 0, 0, 0)
@@ -186,27 +205,27 @@ function Animal.Ride()
 		RemoveAnimDict(AminD2)
 		if HelperMessageID > 0 then
 			HelperMessageID = 0
-			ClearAllHelpMessages()				
+			ClearAllHelpMessages() -- Clears all help messages on screen
 		end
 
 	else
 		for _, Ped in pairs(GetNearbyPeds(PedPosition.x, PedPosition.y, PedPosition.z, 2.0)) do
 			if not IsPedFalling(Ped) and not IsPedFatallyInjured(Ped) and not IsPedDeadOrDying(Ped) 
-			   and not IsPedDeadOrDying(Ped) and not IsPedGettingUp(Ped) and not IsPedRagdoll(Ped) then
+			   and not IsPedDeadOrDying(Ped) and not IsPedGettingUp(Ped) and not IsPedRagdoll(Ped) then -- Checks animal status (dead/dying/ragdolled)
 				if (GetEntityModel(Ped) == GetHashKey("a_c_deer") or GetEntityModel(Ped) == GetHashKey("a_c_cow")
 					or GetEntityModel(Ped) == GetHashKey("a_c_boar")) then
 					
-					if NetworkGetPlayerIndexFromPed(Ped) > -1 and not AllowRidingAnimalPlayers then
+					if NetworkGetPlayerIndexFromPed(Ped) > -1 and not AllowRidingAnimalPlayers then	-- Stops player riding animal if animal is dead/dying/ragdolled
 						return
 					end
 				
-					for _, Ped2 in pairs(GetNearbyPeds(PedPosition.x, PedPosition.y, PedPosition.z, 4.0)) do
+					for _, Ped2 in pairs(GetNearbyPeds(PedPosition.x, PedPosition.y, PedPosition.z, 4.0)) do -- Does not allow player to attach to another animal while already attached to one
 						if IsEntityAttachedToEntity(Ped2, Ped) then
 							return
 						end
 					end
 
-					if OnPlayerRequestToRideAnimal() then
+					if OnPlayerRequestToRideAnimal() then -- Checks if player is allowed to ride
 						Animal.Handle = Ped
 						Animal.Attach()
 					end
@@ -223,7 +242,7 @@ function DropPlayerFromAnimal()
 	DetachEntity(Ped, true, false)
 	ClearPedTasksImmediately(Ped)
 	ClearPedSecondaryTask(Ped)
-	Animal.InControl = false
+	Animal.InControl = false -- Stops player from being in control
 	AminD2 = "amb@prop_human_seat_chair@male@elbows_on_knees@react_aggressive"
 	RequestAnimDict(AminD2)
 	while not HasAnimDictLoaded(AminD2) do
@@ -234,9 +253,9 @@ function DropPlayerFromAnimal()
 	ClearPedSecondaryTask(Ped)
 	ClearPedTasksImmediately(Ped)
 	Wait(200)
-	SetPedToRagdoll(Ped, 1500, 1500, 0, 0, 0, 0)
-	AnimalControlStatus = 0
-	XNL_IsRidingAnimal = false
+	SetPedToRagdoll(Ped, 1500, 1500, 0, 0, 0, 0) -- Ragdolls the player
+	AnimalControlStatus = 0 -- Sets player to have no control over the animal
+	XNL_IsRidingAnimal = false -- Sets player to not riding
 end
 
 function GetCoordsInfrontOfEntityWithDistance(Entity, Distance, Heading)
@@ -265,7 +284,7 @@ Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(50)
 		if AnimalControlStatus > 0 then
-			AnimalControlStatus = AnimalControlStatus - 0.001
+			AnimalControlStatus = AnimalControlStatus - 0.001 -- Takes 0.001 off the player control over animal until the player has no control over animal
 		end
 	end
 
@@ -275,7 +294,7 @@ Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(0)
 
-		if IsControlJustPressed(1, 23) then
+		if IsControlJustPressed(1, 23) then -- Checks for key press of [F] key
 			Animal.Ride()
 		end
 
@@ -287,19 +306,19 @@ Citizen.CreateThread(function()
 			if DoesEntityExist(Animal.Handle) then
 				AnimalChecksOkay = true
 				if IsPedFalling(AttachedEntity) or IsPedFatallyInjured(AttachedEntity) or IsPedDeadOrDying(AttachedEntity) 
-				   or IsPedDeadOrDying(AttachedEntity) or IsPedDeadOrDying(Ped) or IsPedGettingUp(AttachedEntity) or IsPedRagdoll(AttachedEntity) then
-					Animal.IsFleeing = false
-					Animal.InControl = false
-					AnimalChecksOkay = false
-					DropPlayerFromAnimal()
+				   or IsPedDeadOrDying(AttachedEntity) or IsPedDeadOrDying(Ped) or IsPedGettingUp(AttachedEntity) or IsPedRagdoll(AttachedEntity) then -- Checks if animal is dead/dying/ragdolled
+					Animal.IsFleeing = false -- Sets animal to calm/not fleeing
+					Animal.InControl = false -- Sets player to not have control
+					AnimalChecksOkay = false 
+					DropPlayerFromAnimal() -- Runs function to detach player from animal and ragdoll
 				end
 			
-				if AnimalChecksOkay then
+				if AnimalChecksOkay then -- If animal is okay, resume riding
 					local LeftAxisXNormal, LeftAxisYNormal = GetControlNormal(2, 218), GetControlNormal(2, 219)
-					local Speed, Range = Animal.Speed.Walk, 4.0
+					local Speed, Range = Animal.Speed.Walk, 4.0 -- Animal speed is a walk when control buttons pressed (W/A/S/D)
 
 					if IsControlPressed(0, rideAnimal) then
-                        Speed = Animal.Speed.Run
+                        Speed = Animal.Speed.Run -- If key pressed, animal speed is run
                         Range = 4.0
                     end
 
@@ -315,13 +334,13 @@ Citizen.CreateThread(function()
 						end
 					else
 						if NetworkGetPlayerIndexFromPed(Animal.Handle) == -1 then
-							if IsControlJustPressed(1, 71) then
+							if IsControlJustPressed(1, 71) then -- Rapidly pressing the [W] key allows the player to gain control of the animal
 								if AnimalControlStatus < 0.1 then
 									AnimalControlStatus = AnimalControlStatus + 0.005
 									if AnimalControlStatus > 0.1 then 
 										AnimalControlStatus = 0.1 
 										if HelperMessageID > 4 or HelperMessageID < 4 then
-											DisplayHelpText("You've gained control of the animal.")
+											DisplayHelpText("You've gained control of the animal.") -- If [W] key is pressed enough, the player will have control over the animal
 											HelperMessageID = 4
 											AnimalControlStatus = 0
 											Animal.InControl = true
@@ -332,7 +351,7 @@ Citizen.CreateThread(function()
 						
 							if AnimalControlStatus <= 0.001 and not Animal.InControl then
 								if HelperMessageID > 3 or HelperMessageID < 3 then
-									DisplayHelpText("You've the lost your grip and fell off.")
+									DisplayHelpText("You've the lost your grip and fell off.") -- If [W] key is not pressed enough, the player will have no control over the animal and fall off
 									HelperMessageID = 3
 								end
 								DropPlayerFromAnimal()
